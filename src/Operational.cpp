@@ -10,8 +10,8 @@ short stepMainLeft = 100;                 // перемещение левой �
 short stepMainRight = stepMainLeft;       // перемещение правой кассеты на одно нажатие кнопки
 short stepReboundLeft = 200;              // отскок от исходного левой кассеты в первую позицию
 short stepReboundRight = stepReboundLeft; // отскок от исходного правой кассеты в первую позицию
-long stepToHome = -500;
-short accelerateDefault = 1000;
+int stepToHome = -500;
+short accelerateDefault = 500;
 short speedForStep = 1000;
 short speedForHoming = 1000;
 short maxCountOfStepsLeft = 6;
@@ -70,56 +70,52 @@ void buttonsHandler()
     btnEndstopRight.read();
 }
 
+void stepperHandler()
+{
+    // if (btnPusherDeb.isPressed())
+    // {
+        carriageStep();
+        carriageHome();
+    //}
+}
+
 void carriageStep()
 {
-    if (btnPusherDeb.isPressed())
+    if (canStepLeft == true)
     {
-        if (canStepLeft == true)
+        if (btnStepLeftDeb.wasPressed())
         {
-            if (btnStepLeftDeb.wasPressed())
+            if (counterStepsLeft == 0)
             {
-                if (counterStepsLeft == 0)
+                stepperLeft.setSpeedInStepsPerSecond(speedForStep);
+                stepperLeft.moveRelativeInSteps(stepFirstLeft);
+                counterStepsLeft++;
+            }
+            else if (counterStepsLeft < maxCountOfStepsLeft)
+            {
+                stepperLeft.setSpeedInStepsPerSecond(speedForStep);
+                stepperLeft.moveRelativeInSteps(stepMainLeft);
+                counterStepsLeft++;
+                if (counterStepsLeft == maxCountOfStepsLeft)
                 {
-                    stepperLeft.setSpeedInStepsPerSecond(speedForStep);
-                    stepperLeft.moveRelativeInSteps(stepFirstLeft);
-                    counterStepsLeft++;
+                    canStepLeft = false;
                 }
-                else if (counterStepsLeft < maxCountOfStepsLeft)
-                {
-                    stepperLeft.setSpeedInStepsPerSecond(speedForStep);
-                    stepperLeft.moveRelativeInSteps(stepMainLeft);
-                    counterStepsLeft++;
-                    if (counterStepsLeft == maxCountOfStepsLeft)
-                    {
-                        canStepLeft = false;
-                    }
-                }
+            }
+            else
+            {
+                stepperLeft.setupStop();
             }
         }
     }
-
-    // // 0 wait time indicates the motor has stopped
-    // if (wait_time_micros <= 0)
-    // {
-    // }
-
-    // // (optional) execute other code if we have enough time
-    // if (wait_time_micros > 100)
-    // {
-    //     // other code here
-    // }
 }
 
 void carriageHome()
 {
-    if (btnPusherDeb.isPressed())
+    if (btnHomeLeftDeb.wasPressed())
     {
-        if (btnHomeLeftDeb.wasPressed())
-        {
-            stepperLeft.setSpeedInStepsPerSecond(speedForHoming);
-            stepperLeft.moveRelativeInSteps(stepToHome);
-            counterStepsLeft = 0;
-        }
+        stepperLeft.setSpeedInStepsPerSecond(speedForHoming);
+        stepperLeft.moveRelativeInSteps(stepToHome);
+        counterStepsLeft = 0;
     }
 
     // if (side == LEFT)
@@ -312,8 +308,7 @@ unsigned long timeLogs = 0;
 
 void watchLogs()
 {
-    if (btnStepLeftDeb.wasPressed() ||
-        btnHomeLeftDeb.wasPressed())
+    if (timeLogs + 2000 < millis())
     {
         timeLogs = millis();
         Serial.print("Left STEP btn: ");

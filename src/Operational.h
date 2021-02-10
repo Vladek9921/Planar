@@ -4,8 +4,7 @@
 
 void buttonsHandler();
 void initObjects();
-void carriageStep();
-void carriageHome();
+void stepperHandler();
 void watchLogs();
 
 #endif
