@@ -6,13 +6,14 @@
 
 short stepFirstLeft = 150;
 short stepFirstRight = stepFirstLeft;
-short stepLeft = 100;                     // перемещение левой кассеты на одно нажатие кнопки
-short stepRight = stepLeft;               // перемещение правой кассеты на одно нажатие кнопки
+short stepMainLeft = 100;                 // перемещение левой кассеты на одно нажатие кнопки
+short stepMainRight = stepMainLeft;       // перемещение правой кассеты на одно нажатие кнопки
 short stepReboundLeft = 200;              // отскок от исходного левой кассеты в первую позицию
 short stepReboundRight = stepReboundLeft; // отскок от исходного правой кассеты в первую позицию
 long stepToHome = -500;
-short accelerateDefault = 2000;
-short decelerationDefault = accelerateDefault;
+short accelerateDefault = 1000;
+short speedForStep = 1000;
+short speedForHoming = 1000;
 short maxCountOfStepsLeft = 6;
 short maxCountOfStepsRight = maxCountOfStepsLeft;
 
@@ -41,8 +42,7 @@ Button btnHomeRightDeb(PIN_BUTTON_HOME_RIGHT);
 Button btnPusherDeb(PIN_BUTTON_PUSHER);
 Button btnEndstopLeft(PIN_ENDSTOP_LEFT);
 Button btnEndstopRight(PIN_ENDSTOP_RIGHT);
-BasicStepperDriver stepperLeft(200, PIN_DIR_LEFT, PIN_STEP_LEFT);
-BasicStepperDriver stepperRight(200, PIN_DIR_RIGHT, PIN_STEP_RIGHT);
+SpeedyStepper stepperLeft;
 
 void initObjects()
 {
@@ -54,10 +54,9 @@ void initObjects()
     btnPusherDeb.begin();
     btnEndstopLeft.begin();
     btnEndstopRight.begin();
-    stepperLeft.begin();
-    stepperRight.begin();
-    stepperLeft.setSpeedProfile(stepperLeft.LINEAR_SPEED, accelerateDefault, decelerationDefault);
-    stepperRight.setSpeedProfile(stepperRight.LINEAR_SPEED, accelerateDefault, decelerationDefault);
+    stepperLeft.connectToPins(PIN_STEP_LEFT, PIN_DIR_LEFT);
+    stepperLeft.setSpeedInStepsPerSecond(1000);
+    stepperLeft.setAccelerationInStepsPerSecondPerSecond(accelerateDefault);
 }
 
 void buttonsHandler()
@@ -71,36 +70,33 @@ void buttonsHandler()
     btnEndstopRight.read();
 }
 
-void stepperNextAction()
-{
-    wait_time_micros = stepperLeft.nextAction();
-}
-
 void carriageStep()
 {
-    // if (btnPusherDeb.isPressed())
-    // {
-    //     if (canStepLeft == true)
-    //     {
-    //         if (btnStepLeftDeb.wasPressed())
-    //         {
-    //             if (counterStepsLeft == 0)
-    //             {
-    //                 stepperLeft.startMove(stepFirstLeft);
-    //                 counterStepsLeft++;
-    //             }
-    //             else if (counterStepsLeft < maxCountOfStepsLeft)
-    //             {
-    //                 stepperLeft.startMove(stepLeft);
-    //                 counterStepsLeft++;
-    //                 if (counterStepsLeft == maxCountOfStepsLeft)
-    //                 {
-    //                     canStepLeft = false;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+    if (btnPusherDeb.isPressed())
+    {
+        if (canStepLeft == true)
+        {
+            if (btnStepLeftDeb.wasPressed())
+            {
+                if (counterStepsLeft == 0)
+                {
+                    stepperLeft.setSpeedInStepsPerSecond(speedForStep);
+                    stepperLeft.moveRelativeInSteps(stepFirstLeft);
+                    counterStepsLeft++;
+                }
+                else if (counterStepsLeft < maxCountOfStepsLeft)
+                {
+                    stepperLeft.setSpeedInStepsPerSecond(speedForStep);
+                    stepperLeft.moveRelativeInSteps(stepMainLeft);
+                    counterStepsLeft++;
+                    if (counterStepsLeft == maxCountOfStepsLeft)
+                    {
+                        canStepLeft = false;
+                    }
+                }
+            }
+        }
+    }
 
     // // 0 wait time indicates the motor has stopped
     // if (wait_time_micros <= 0)
@@ -120,7 +116,8 @@ void carriageHome()
     {
         if (btnHomeLeftDeb.wasPressed())
         {
-            stepperLeft.startMove(stepToHome);
+            stepperLeft.setSpeedInStepsPerSecond(speedForHoming);
+            stepperLeft.moveRelativeInSteps(stepToHome);
             counterStepsLeft = 0;
         }
     }

@@ -15,7 +15,6 @@ void setup()
 void loop()
 {
     buttonsHandler();
-    stepperNextAction();
     carriageStep();
     carriageHome();
     watchLogs();

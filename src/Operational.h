@@ -7,6 +7,5 @@ void initObjects();
 void carriageStep();
 void carriageHome();
 void watchLogs();
-void stepperNextAction();
 
 #endif
