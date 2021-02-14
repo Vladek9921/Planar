@@ -5,6 +5,7 @@
 void buttonsHandler();
 void initObjects();
 void stepperHandler();
+void carriageHandler();
 void watchLogs();
 
 #endif

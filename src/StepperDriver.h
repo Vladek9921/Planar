@@ -1,86 +1,67 @@
-#ifndef SpeedyStepper_h
-#define SpeedyStepper_h
+#ifndef STEPPER_DRIVER
+
+#define STEPPER_DRIVER
 
 #include <Arduino.h>
-#include <stdlib.h>
+#include "Timers.h"
 
-
-//
-// the SpeedyStepper class
-//
-class SpeedyStepper
+class StepperDriver
 {
-  public:
-    //
-    // public functions
-    //
-    SpeedyStepper();
-    void connectToPins(byte stepPinNumber, byte directionPinNumber);
-    
-    void setStepsPerMillimeter(float motorStepPerMillimeter);
-    float getCurrentPositionInMillimeters();
-    void setCurrentPositionInMillimeters(float currentPositionInMillimeter);
-    void setSpeedInMillimetersPerSecond(float speedInMillimetersPerSecond);
-    void setAccelerationInMillimetersPerSecondPerSecond(float accelerationInMillimetersPerSecondPerSecond);
-    bool moveToHomeInMillimeters(long directionTowardHome, float speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters, int homeLimitSwitchPin);
-    void moveRelativeInMillimeters(float distanceToMoveInMillimeters);
-    void setupRelativeMoveInMillimeters(float distanceToMoveInMillimeters);
-    void moveToPositionInMillimeters(float absolutePositionToMoveToInMillimeters);
-    void setupMoveInMillimeters(float absolutePositionToMoveToInMillimeters);
-    float getCurrentVelocityInMillimetersPerSecond();
-    
+private:
+    uint8_t pinDir;
+    uint8_t pinStep;
+    uint8_t stepsPerRotation;
+    uint32_t timeOneStep = 0;
+    bool direction;
+    long int steps;
+    uint32_t speed;
 
-    void setStepsPerRevolution(float motorStepPerRevolution);
-    float getCurrentPositionInRevolutions();
-    void setSpeedInRevolutionsPerSecond(float speedInRevolutionsPerSecond);
-    void setCurrentPositionInRevolutions(float currentPositionInRevolutions);
-    void setAccelerationInRevolutionsPerSecondPerSecond(float accelerationInRevolutionsPerSecondPerSecond);
-    bool moveToHomeInRevolutions(long directionTowardHome, float speedInRevolutionsPerSecond, long maxDistanceToMoveInRevolutions, int homeLimitSwitchPin);
-    void moveRelativeInRevolutions(float distanceToMoveInRevolutions);
-    void setupRelativeMoveInRevolutions(float distanceToMoveInRevolutions);
-    void moveToPositionInRevolutions(float absolutePositionToMoveToInRevolutions);
-    void setupMoveInRevolutions(float absolutePositionToMoveToInRevolutions);
-    float getCurrentVelocityInRevolutionsPerSecond();
+public:
+    StepperDriver(uint8_t pinDirection, uint8_t pinStep, uint8_t stepsPerRotate)
+    {
+        this->pinDir = pinDirection;
+        this->pinStep = pinStep;
+        this->stepsPerRotation = stepsPerRotate;
+    }
 
-    void enableStepper(void);
-    void disableStepper(void);
-    void setCurrentPositionInSteps(long currentPositionInSteps);
-    long getCurrentPositionInSteps();
-    void setupStop();
-    void setSpeedInStepsPerSecond(float speedInStepsPerSecond);
-    void setAccelerationInStepsPerSecondPerSecond(float accelerationInStepsPerSecondPerSecond);
-    bool moveToHomeInSteps(long directionTowardHome, float speedInStepsPerSecond, long maxDistanceToMoveInSteps, int homeSwitchPin);
-    void moveRelativeInSteps(long distanceToMoveInSteps);
-    void setupRelativeMoveInSteps(long distanceToMoveInSteps);
-    void moveToPositionInSteps(long absolutePositionToMoveToInSteps);
-    void setupMoveInSteps(long absolutePositionToMoveToInSteps);
-    bool motionComplete();
-    float getCurrentVelocityInStepsPerSecond(); 
-    bool processMovement(void);
+    void handler()
+    {
+        // if (steps != 0)
+        // {
+        //     if (timeOneStep + speed < millis())
+        //     {
+        //         digitalWrite(pinStep, !digitalRead(pinStep));
+        //         timeOneStep = millis();
+        //         steps--;
+        //     }
+        // }
+        if (this->steps != 0)
+        {
+            this->steps--;
+            digitalWrite(this->pinStep, !digitalRead(this->pinStep));
+        }
+        Serial.println("sdfasfdasdf");
+    }
 
+    void move(long int steps, bool direction, uint32_t speed)
+    {
+        if (direction == true)
+        {
+            digitalWrite(pinDir, HIGH);
+        }
+        if (direction == false)
+        {
+            digitalWrite(pinDir, LOW);
+        }
+        this->speed = speed;
+        this->steps = steps;
+    }
 
-  private:
-    //
-    // private member variables
-    //
-    byte stepPin;
-    byte directionPin;
-    float desiredSpeed_InStepsPerSecond;
-    float acceleration_InStepsPerSecondPerSecond;
-    long targetPosition_InSteps;
-    float stepsPerMillimeter;
-    float stepsPerRevolution;
-    bool startNewMove;
-    float desiredStepPeriod_InUS;
-    long decelerationDistance_InSteps;
-    int direction_Scaler;
-    float ramp_InitialStepPeriod_InUS;
-    float ramp_NextStepPeriod_InUS;
-    unsigned long ramp_LastStepTime_InUS;
-    float acceleration_InStepsPerUSPerUS;
-    float currentStepPeriod_InUS;
-    long currentPosition_InSteps;
+    void begin()
+    {
+        Timer2.setFrequency(1);
+        Timer2.enableISR(CHANNEL_A);
+    }
 };
 
-// ------------------------------------ End ---------------------------------
 #endif

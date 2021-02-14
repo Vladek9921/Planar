@@ -42,7 +42,8 @@ Button btnHomeRightDeb(PIN_BUTTON_HOME_RIGHT);
 Button btnPusherDeb(PIN_BUTTON_PUSHER);
 Button btnEndstopLeft(PIN_ENDSTOP_LEFT);
 Button btnEndstopRight(PIN_ENDSTOP_RIGHT);
-SpeedyStepper stepperLeft;
+
+StepperDriver stepperLeft(PIN_DIR_LEFT, PIN_STEP_LEFT, 200);
 
 void initObjects()
 {
@@ -54,9 +55,7 @@ void initObjects()
     btnPusherDeb.begin();
     btnEndstopLeft.begin();
     btnEndstopRight.begin();
-    stepperLeft.connectToPins(PIN_STEP_LEFT, PIN_DIR_LEFT);
-    stepperLeft.setSpeedInStepsPerSecond(1000);
-    stepperLeft.setAccelerationInStepsPerSecondPerSecond(accelerateDefault);
+    stepperLeft.begin();
 }
 
 void buttonsHandler()
@@ -72,11 +71,13 @@ void buttonsHandler()
 
 void stepperHandler()
 {
-    // if (btnPusherDeb.isPressed())
-    // {
-        carriageStep();
-        carriageHome();
-    //}
+    stepperLeft.handler();
+}
+
+void carriageHandler()
+{
+    carriageStep();
+    carriageHome();
 }
 
 void carriageStep()
@@ -87,23 +88,17 @@ void carriageStep()
         {
             if (counterStepsLeft == 0)
             {
-                stepperLeft.setSpeedInStepsPerSecond(speedForStep);
-                stepperLeft.moveRelativeInSteps(stepFirstLeft);
+                stepperLeft.move(stepFirstLeft, true, 1);
                 counterStepsLeft++;
             }
-            else if (counterStepsLeft < maxCountOfStepsLeft)
+            else //if (counterStepsLeft < maxCountOfStepsLeft)
             {
-                stepperLeft.setSpeedInStepsPerSecond(speedForStep);
-                stepperLeft.moveRelativeInSteps(stepMainLeft);
+                stepperLeft.move(stepMainLeft, true, 1);
                 counterStepsLeft++;
                 if (counterStepsLeft == maxCountOfStepsLeft)
                 {
-                    canStepLeft = false;
+                    //canStepLeft = false;
                 }
-            }
-            else
-            {
-                stepperLeft.setupStop();
             }
         }
     }
@@ -113,8 +108,7 @@ void carriageHome()
 {
     if (btnHomeLeftDeb.wasPressed())
     {
-        stepperLeft.setSpeedInStepsPerSecond(speedForHoming);
-        stepperLeft.moveRelativeInSteps(stepToHome);
+
         counterStepsLeft = 0;
     }
 
@@ -308,21 +302,23 @@ unsigned long timeLogs = 0;
 
 void watchLogs()
 {
-    if (timeLogs + 2000 < millis())
-    {
-        timeLogs = millis();
-        Serial.print("Left STEP btn: ");
-        Serial.println(digitalRead(PIN_BUTTON_STEP_LEFT));
-        Serial.print("Left HOME btn: ");
-        Serial.println(digitalRead(PIN_BUTTON_HOME_LEFT));
-        Serial.print("Left STEP drv: ");
-        Serial.println(digitalRead(PIN_STEP_LEFT));
-        Serial.print("Left DIR  drv: ");
-        Serial.println(digitalRead(PIN_DIR_LEFT));
-        Serial.print("Pusher button: ");
-        Serial.println(btnPusherDeb.isPressed());
-        Serial.print("counterStepsL: ");
-        Serial.println(counterStepsLeft);
-        Serial.println("/////////////////");
-    }
+    Serial.print("Left STEP drv: ");
+    Serial.println(digitalRead(PIN_STEP_LEFT));
+    // if (timeLogs + 2000 < millis())
+    // {
+    //     timeLogs = millis();
+    //     Serial.print("Left STEP btn: ");
+    //     Serial.println(digitalRead(PIN_BUTTON_STEP_LEFT));
+    //     Serial.print("Left HOME btn: ");
+    //     Serial.println(digitalRead(PIN_BUTTON_HOME_LEFT));
+    //     Serial.print("Left STEP drv: ");
+    //     Serial.println(digitalRead(PIN_STEP_LEFT));
+    //     Serial.print("Left DIR  drv: ");
+    //     Serial.println(digitalRead(PIN_DIR_LEFT));
+    //     Serial.print("Pusher button: ");
+    //     Serial.println(btnPusherDeb.isPressed());
+    //     Serial.print("counterStepsL: ");
+    //     Serial.println(counterStepsLeft);
+    //     Serial.println("/////////////////");
+    // }
 }
