@@ -5,7 +5,6 @@
 
 #include "Pins.h"
 #include "Operational.h"
-#include "Timers.h"
 
 void setup()
 {
@@ -17,9 +16,4 @@ void loop()
 {
     buttonsHandler();
     watchLogs();
-}
-
-ISR(TIMER2_A)
-{
-    stepperHandler();
 }

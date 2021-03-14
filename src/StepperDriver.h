@@ -3,7 +3,6 @@
 #define STEPPER_DRIVER
 
 #include <Arduino.h>
-#include "Timers.h"
 
 class StepperDriver
 {
@@ -59,8 +58,7 @@ public:
 
     void begin()
     {
-        Timer2.setFrequency(1);
-        Timer2.enableISR(CHANNEL_A);
+
     }
 };
 

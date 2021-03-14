@@ -2,7 +2,6 @@
 #include "Operational.h"
 #include "Pins.h"
 #include "Debounce.h"
-#include "StepperDriver.h"
 
 short stepFirstLeft = 150;
 short stepFirstRight = stepFirstLeft;
@@ -35,43 +34,44 @@ bool canStepRight = false;
 void carriageStep();
 void carriageHome();
 
-Button btnStepLeftDeb(PIN_BUTTON_STEP_LEFT);
-Button btnStepRightDeb(PIN_BUTTON_STEP_RIGHT);
-Button btnHomeLeftDeb(PIN_BUTTON_HOME_LEFT);
-Button btnHomeRightDeb(PIN_BUTTON_HOME_RIGHT);
-Button btnPusherDeb(PIN_BUTTON_PUSHER);
+Button btnStepLeft(PIN_BUTTON_STEP_LEFT);
+Button btnStepRight(PIN_BUTTON_STEP_RIGHT);
+Button btnHomeLeft(PIN_BUTTON_HOME_LEFT);
+Button btnHomeRight(PIN_BUTTON_HOME_RIGHT);
+Button btnPusher(PIN_BUTTON_PUSHER);
 Button btnEndstopLeft(PIN_ENDSTOP_LEFT);
 Button btnEndstopRight(PIN_ENDSTOP_RIGHT);
-
-StepperDriver stepperLeft(PIN_DIR_LEFT, PIN_STEP_LEFT, 200);
 
 void initObjects()
 {
     Serial.begin(9600);
-    btnStepLeftDeb.begin();
-    btnStepRightDeb.begin();
-    btnHomeLeftDeb.begin();
-    btnHomeRightDeb.begin();
-    btnPusherDeb.begin();
+    btnStepLeft.begin();
+    btnStepRight.begin();
+    btnHomeLeft.begin();
+    btnHomeRight.begin();
+    btnPusher.begin();
     btnEndstopLeft.begin();
     btnEndstopRight.begin();
-    stepperLeft.begin();
 }
 
 void buttonsHandler()
 {
-    btnStepLeftDeb.read();
-    btnStepRightDeb.read();
-    btnHomeLeftDeb.read();
-    btnHomeRightDeb.read();
-    btnPusherDeb.read();
+    btnStepLeft.read();
+    btnStepRight.read();
+    btnHomeLeft.read();
+    btnHomeRight.read();
+    btnPusher.read();
     btnEndstopLeft.read();
     btnEndstopRight.read();
+
+    if (btnStepLeft.wasPressed())
+    {
+        digitalWrite(PIN_LED, !digitalRead(PIN_LED));
+    }
 }
 
 void stepperHandler()
 {
-    stepperLeft.handler();
 }
 
 void carriageHandler()
@@ -84,16 +84,16 @@ void carriageStep()
 {
     if (canStepLeft == true)
     {
-        if (btnStepLeftDeb.wasPressed())
+        if (btnStepLeft.wasPressed())
         {
             if (counterStepsLeft == 0)
             {
-                stepperLeft.move(stepFirstLeft, true, 1);
+
                 counterStepsLeft++;
             }
             else //if (counterStepsLeft < maxCountOfStepsLeft)
             {
-                stepperLeft.move(stepMainLeft, true, 1);
+
                 counterStepsLeft++;
                 if (counterStepsLeft == maxCountOfStepsLeft)
                 {
@@ -106,7 +106,7 @@ void carriageStep()
 
 void carriageHome()
 {
-    if (btnHomeLeftDeb.wasPressed())
+    if (btnHomeLeft.wasPressed())
     {
 
         counterStepsLeft = 0;
@@ -302,23 +302,23 @@ unsigned long timeLogs = 0;
 
 void watchLogs()
 {
-    Serial.print("Left STEP drv: ");
-    Serial.println(digitalRead(PIN_STEP_LEFT));
-    // if (timeLogs + 2000 < millis())
-    // {
-    //     timeLogs = millis();
-    //     Serial.print("Left STEP btn: ");
-    //     Serial.println(digitalRead(PIN_BUTTON_STEP_LEFT));
-    //     Serial.print("Left HOME btn: ");
-    //     Serial.println(digitalRead(PIN_BUTTON_HOME_LEFT));
-    //     Serial.print("Left STEP drv: ");
-    //     Serial.println(digitalRead(PIN_STEP_LEFT));
-    //     Serial.print("Left DIR  drv: ");
-    //     Serial.println(digitalRead(PIN_DIR_LEFT));
-    //     Serial.print("Pusher button: ");
-    //     Serial.println(btnPusherDeb.isPressed());
-    //     Serial.print("counterStepsL: ");
-    //     Serial.println(counterStepsLeft);
-    //     Serial.println("/////////////////");
-    // }
+    // Serial.print("Left STEP drv: ");
+    // Serial.println(digitalRead(PIN_STEP_LEFT));
+    if (timeLogs + 2000 < millis())
+    {
+        timeLogs = millis();
+        Serial.print("Left STEP btn: ");
+        Serial.println(digitalRead(PIN_BUTTON_STEP_LEFT));
+        Serial.print("Left HOME btn: ");
+        Serial.println(digitalRead(PIN_BUTTON_HOME_LEFT));
+        Serial.print("Left STEP drv: ");
+        Serial.println(digitalRead(PIN_STEP_LEFT));
+        Serial.print("Left DIR  drv: ");
+        Serial.println(digitalRead(PIN_DIR_LEFT));
+        Serial.print("Pusher button: ");
+        Serial.println(btnPusher.isPressed());
+        Serial.print("counterStepsL: ");
+        Serial.println(counterStepsLeft);
+        Serial.println("/////////////////");
+    }
 }

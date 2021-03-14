@@ -14,4 +14,5 @@ void setPinMode()
     pinMode(PIN_ENDSTOP_LEFT, INPUT);
     pinMode(PIN_ENDSTOP_RIGHT, INPUT);
     pinMode(PIN_BUTTON_PUSHER, INPUT);
+    pinMode(PIN_LED, OUTPUT);
 }
