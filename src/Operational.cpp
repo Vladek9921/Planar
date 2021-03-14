@@ -12,10 +12,11 @@ short stepReboundLeft = 200;              // отскок от исходног�
 short stepReboundRight = stepReboundLeft; // отскок от исходного правой кассеты в первую позицию
 int stepToHome = -500;
 short accelerateDefault = 500;
-short speedForStep = 1000;
+short speedForStep = 10000;
 short speedForHoming = 1000;
 short maxCountOfStepsLeft = 6;
 short maxCountOfStepsRight = maxCountOfStepsLeft;
+unsigned long int coordinateStepperLeft = 0;
 
 unsigned wait_time_micros = 0;
 short counterStepsLeft = 0;
@@ -54,9 +55,8 @@ void initObjects()
     btnPusher.begin();
     btnEndstopLeft.begin();
     btnEndstopRight.begin();
-    stepperLeft.setMaxSpeed(200.0);
-    stepperLeft.setAcceleration(100.0);
-    stepperLeft.moveTo(2000);
+    stepperLeft.setMaxSpeed(speedForStep);
+    stepperLeft.setAcceleration(2000.0);
 }
 
 void buttonsHandler()
@@ -77,9 +77,8 @@ void buttonsHandler()
 
 void stepperHandler()
 {
-    if (stepperLeft.distanceToGo() == 0)
-        stepperLeft.moveTo(-stepperLeft.currentPosition());
-    stepperLeft.run();
+    // stepperLeft.moveTo(coordinateStepperLeft);
+    // stepperLeft.setSpeed(speedForStep);
 }
 
 void carriageHandler()
@@ -96,12 +95,13 @@ void carriageStep()
         {
             if (counterStepsLeft == 0)
             {
-
+                coordinateStepperLeft += stepFirstLeft;
                 counterStepsLeft++;
             }
             else //if (counterStepsLeft < maxCountOfStepsLeft)
             {
-
+                coordinateStepperLeft += stepMainLeft;
+                stepperLeft.runToNewPosition(coordinateStepperLeft);
                 counterStepsLeft++;
                 if (counterStepsLeft == maxCountOfStepsLeft)
                 {
@@ -116,7 +116,7 @@ void carriageHome()
 {
     if (btnHomeLeft.wasPressed())
     {
-
+        coordinateStepperLeft = 0;
         counterStepsLeft = 0;
     }
 
@@ -327,6 +327,8 @@ void watchLogs()
         Serial.println(btnPusher.isPressed());
         Serial.print("counterStepsL: ");
         Serial.println(counterStepsLeft);
+        Serial.print("coorginateLeft: ");
+        Serial.println(coordinateStepperLeft);
         Serial.println("/////////////////");
     }
 }

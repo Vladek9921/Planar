@@ -16,5 +16,6 @@ void loop()
 {
     buttonsHandler();
     stepperHandler();
+    carriageHandler();
     watchLogs();
 }
