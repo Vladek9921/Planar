@@ -2,6 +2,7 @@
 #include "Operational.h"
 #include "Pins.h"
 #include "Debounce.h"
+#include "StepperLib/AccelStepper.h"
 
 short stepFirstLeft = 150;
 short stepFirstRight = stepFirstLeft;
@@ -41,6 +42,7 @@ Button btnHomeRight(PIN_BUTTON_HOME_RIGHT);
 Button btnPusher(PIN_BUTTON_PUSHER);
 Button btnEndstopLeft(PIN_ENDSTOP_LEFT);
 Button btnEndstopRight(PIN_ENDSTOP_RIGHT);
+AccelStepper stepperLeft(AccelStepper::DRIVER, PIN_STEP_LEFT, PIN_DIR_LEFT);
 
 void initObjects()
 {
@@ -52,6 +54,9 @@ void initObjects()
     btnPusher.begin();
     btnEndstopLeft.begin();
     btnEndstopRight.begin();
+    stepperLeft.setMaxSpeed(200.0);
+    stepperLeft.setAcceleration(100.0);
+    stepperLeft.moveTo(2000);
 }
 
 void buttonsHandler()
@@ -72,6 +77,9 @@ void buttonsHandler()
 
 void stepperHandler()
 {
+    if (stepperLeft.distanceToGo() == 0)
+        stepperLeft.moveTo(-stepperLeft.currentPosition());
+    stepperLeft.run();
 }
 
 void carriageHandler()
